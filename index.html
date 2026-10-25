@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBEFD3">
+<title>Lô tô</title>
+<style>
+:root {
+  --ink: #4e2a1e; --cream: #fff3d6; --stamp: #c62828; --online: #2ecc71;
+  --serif: Georgia, "Noto Serif", "Times New Roman", serif;
+  --cond: "Roboto Condensed", sans-serif-condensed, "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --sans: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* palette mặc định: Hội chợ (sáng); JS ghi đè theo skin và chế độ sáng/tối */
+  --surface: #fbefd3; --card: #fff9ea; --input: #f3e2ba; --text: #4e2a1e; --text2: #8d6e63;
+  --primary: #2e7d32; --crimson: #c62828; --accent: #d99a00; --on-accent: #4e2a1e; --accent-box: #ffe7a8;
+  --border: #d9be87; --divider: #e6d3a8;
+  --accent-r: #a87500; --crimson-r: #c62828; --primary-r: #2e7d32;
+  --v-default: #2e7d32; --v-default-r: #2e7d32; --v-default-o: #fff3d6;
+  --v-warning: #f9a825; --v-warning-r: #a56a00; --v-warning-o: #4e2a1e;
+  --v-danger: #c62828; --v-danger-r: #c62828; --v-danger-o: #fff3d6;
+  --v-info: #1976d2; --v-info-r: #1976d2; --v-info-o: #fff3d6;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--surface); color: var(--text); font: 14px/1.35 var(--sans); }
+body { min-height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+[hidden] { display: none !important; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .5; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.screen { max-width: 480px; margin: 0 auto; padding: 10px 10px 28px; }
+
+.framed { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; }
+.v-default { --c: var(--v-default); --cr: var(--v-default-r); --co: var(--v-default-o); }
+.v-warning { --c: var(--v-warning); --cr: var(--v-warning-r); --co: var(--v-warning-o); }
+.v-danger { --c: var(--v-danger); --cr: var(--v-danger-r); --co: var(--v-danger-o); }
+.v-info { --c: var(--v-info); --cr: var(--v-info-r); --co: var(--v-info-o); }
+.btn { min-height: 38px; padding: 6px 16px; border-radius: 999px; font-weight: 700; white-space: nowrap; }
+.btn.filled { background: var(--c); border: 2px solid var(--cr); color: var(--co); }
+.btn.ghost { background: color-mix(in srgb, var(--c) 8%, transparent); border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); color: var(--cr); }
+.btn.block { width: 100%; font-size: 15px; }
+
+/* top bar */
+.topbar { display: flex; align-items: center; gap: 6px; height: 44px; }
+.profile { flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 999px; }
+.profile .who { min-width: 0; line-height: 1.05; }
+.profile b { display: block; font-size: 14px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile small { display: block; font-size: 11px; font-weight: 900; color: var(--accent); }
+.packet { flex: none; position: relative; width: var(--w, 18px); height: calc(var(--w, 18px) * 1.35); background: var(--stamp); border: 1px solid var(--accent); border-radius: 3px; }
+.packet::after { content: ""; position: absolute; inset: 0; margin: auto; width: 40%; aspect-ratio: 1; border-radius: 50%; background: var(--accent); }
+.round { position: relative; flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--accent); padding: 0; }
+.round svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.badge { position: absolute; top: -2px; right: -2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #e53935; color: #fff; font-size: 9px; display: grid; place-items: center; }
+
+/* caller card */
+.caller { position: relative; margin: 24px 0 8px; padding: 22px 10px 10px; border-radius: 18px; border-width: 2px; display: grid; gap: 8px; }
+.statechip { position: absolute; left: 50%; top: -15px; transform: translateX(-50%); height: 30px; padding: 0 16px; display: grid; place-items: center; border-radius: 999px; border-width: 2px; color: var(--accent); font-weight: 900; font-size: 16px; white-space: nowrap; }
+.corner { position: absolute; top: -15px; display: flex; gap: 6px; }
+.corner.l { left: 10px; } .corner.r { right: 10px; }
+.corner button { position: relative; height: 30px; min-width: 30px; padding: 0 8px; border-radius: 999px; display: grid; place-items: center; font-size: 14px; }
+.corner .on { color: var(--online); }
+.callrow { display: flex; align-items: center; gap: 10px; }
+.ball { flex: none; width: var(--s, 56px); height: var(--s, 56px); display: grid; place-items: center; border-radius: 50%; border: 4px solid color-mix(in srgb, var(--accent) 55%, #000); background: radial-gradient(circle, color-mix(in srgb, var(--cream) 32%, var(--accent)), var(--accent)); color: var(--ink); font: 900 calc(var(--s, 56px) * .5)/1 var(--serif); padding: 0; }
+.ball.pop { animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { from { transform: scale(.6) rotate(-10deg); } to { transform: none; } }
+.pot { flex: 1; min-width: 0; }
+.pot .cap { display: flex; align-items: center; gap: 4px; color: var(--text2); font-size: 12px; }
+.pot .val { color: var(--accent); font-size: 22px; font-weight: 900; line-height: 1.1; white-space: nowrap; }
+.chips { display: flex; gap: 6px; }
+fieldset.lchip { margin: 0; min-width: 0; padding: 0 10px 5px; border: 1.5px solid var(--border); border-radius: 10px; background: transparent; text-align: center; }
+fieldset.lchip legend { padding: 0 4px; margin: 0 auto; font-size: 10px; color: var(--text); }
+fieldset.lchip button { border: 0; background: transparent; padding: 1px 2px; color: var(--accent); font-weight: 900; font-size: 15px; }
+fieldset.lchip button:disabled { opacity: 1; cursor: default; }
+.actions { display: flex; gap: 6px; }
+.actions .btn { flex: 1; font-size: 14px; padding: 4px; }
+.actions .btn.wide { flex: 1.3; }
+.tip { position: absolute; left: 50%; top: calc(100% + 12px); transform: translateX(-50%); z-index: 6; min-width: 156px; padding: 10px 22px 8px; text-align: center; border-width: 2px; border-radius: 16px; box-shadow: 0 8px 22px rgba(0,0,0,.22); }
+.tip::before { content: ""; position: absolute; left: 50%; top: -8px; width: 14px; height: 14px; background: var(--card); border-left: 2px solid var(--border); border-top: 2px solid var(--border); transform: translateX(-50%) rotate(45deg); }
+.tip b { display: block; font-size: 13px; font-weight: 700; }
+.tip .secs { color: var(--accent-r); font-size: 28px; font-weight: 900; line-height: 1.15; }
+.tip .tipx { position: absolute; top: -10px; right: -10px; width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 1px solid var(--crimson-r); background: var(--card); color: var(--crimson-r); font-size: 11px; font-weight: 700; }
+.setchips { display: flex; flex-wrap: nowrap; gap: 8px; margin: 6px 0 6px; padding: 10px 2px 2px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+.setchips::-webkit-scrollbar { display: none; }
+.setchips .lchip { flex: none; scroll-snap-align: start; }
+.lost { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 10px 0; padding: 8px 8px 8px 14px; border-radius: 999px; background: var(--crimson); color: #fff; font-weight: 700; }
+
+/* pages: tab strip + card */
+.tabs { display: flex; align-items: flex-end; gap: 4px; min-height: 36px; padding-right: 2px; }
+.tablist { display: flex; gap: 4px; align-items: flex-end; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.tab { flex: none; padding: 0 16px; height: 30px; margin-bottom: 2px; border: 2px solid var(--border); border-bottom: 0; border-radius: 10px 10px 0 0; background: var(--input); font-weight: 700; color: var(--text); }
+.tab[aria-selected=true] { height: 36px; margin-bottom: -2px; background: var(--surface); position: relative; z-index: 1; padding-bottom: 2px; }
+.pill { height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: color-mix(in srgb, var(--c) 12%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); color: var(--cr); margin-bottom: 4px; white-space: nowrap; }
+.viewing { display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 3px 0 10px; margin-bottom: 4px; border-radius: 999px; background: color-mix(in srgb, var(--c) 12%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 70%, transparent); color: var(--cr); font-size: 12px; font-weight: 700; white-space: nowrap; max-width: 62%; }
+.viewing span { overflow: hidden; text-overflow: ellipsis; }
+.viewing button { height: 20px; border: 0; border-radius: 999px; background: var(--c); color: var(--co); font-size: 11px; font-weight: 700; padding: 0 8px; }
+.card { background: var(--surface); border: 2px solid var(--border); border-radius: 0 16px 16px 16px; padding: 6px; position: relative; }
+.card.solo { border-radius: 16px; }
+.toolbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.gridtab { height: 28px; padding: 0 12px; margin-bottom: -2px; position: relative; z-index: 1; border: 2px solid var(--frame); border-bottom: 0; border-radius: 10px 10px 0 0; background: var(--paper); color: var(--ink-p); font-weight: 700; font-size: 13px; }
+.checks { display: flex; gap: 10px; padding-bottom: 3px; }
+.check { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; }
+.check input { appearance: none; width: 24px; height: 24px; margin: 0; border-radius: 7px; border: 2px solid color-mix(in srgb, var(--frame) 80%, transparent); background: var(--card); display: grid; place-items: center; cursor: pointer; }
+.check input:checked { background: var(--paper); }
+.check input:checked::after { content: "✓"; color: var(--ink-p); font-weight: 900; font-size: 15px; line-height: 1; }
+.ticket { display: grid; gap: 6px; }
+.block { border: 2px solid var(--frame); }
+.row { display: grid; grid-template-columns: repeat(9, 1fr); position: relative; }
+.cell { position: relative; aspect-ratio: 1 / .95; display: grid; place-items: center; padding: 0; border: 0; border: .5px solid var(--line); background: var(--paper); color: var(--ink-p); font: 700 clamp(15px, 5.3vw, 22px)/1 var(--cond); }
+.cell.blank { background: var(--blank); }
+.cell .mk { position: absolute; height: 80%; aspect-ratio: 1; border-radius: 50%; background: color-mix(in srgb, var(--crimson) 92%, transparent); }
+.cell .n { position: relative; }
+.cell.on .n { color: var(--mark-text); }
+.row.full::after { content: ""; position: absolute; inset: 0; pointer-events: none; border: 2px solid color-mix(in srgb, var(--accent) 85%, transparent); background: color-mix(in srgb, var(--accent) 14%, transparent); animation: glow 1.2s ease-in-out infinite alternate; }
+@keyframes glow { from { opacity: .4; } to { opacity: .9; } }
+.claimed { position: absolute; inset: 0; border-radius: inherit; display: grid; place-items: center; background: rgba(0,0,0,.35); color: var(--crimson); font-size: 34px; font-weight: 900; }
+.empty { padding: 36px 10px; text-align: center; color: var(--text2); display: grid; gap: 10px; justify-items: center; }
+.empty h3 { margin: 0; color: var(--text); font-size: 17px; }
+.empty p { margin: 0; }
+@media (prefers-reduced-motion: reduce) { .ball.pop { animation: none; } .row.full::after { animation: none; opacity: .7; } }
+
+/* dialogs (folk panel) */
+dialog.folk { width: min(94vw, 440px); max-height: 88dvh; padding: 18px 18px 16px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--card); color: var(--text); overflow: auto; }
+dialog.folk::backdrop { background: rgba(0,0,0,.5); }
+dialog.folk h2 { margin: 0; text-align: center; font-size: 20px; font-weight: 900; padding: 0 28px; }
+.orn { display: flex; align-items: center; gap: 8px; width: 70%; margin: 6px auto 12px; color: var(--accent); }
+.orn i { flex: 1; height: 1.5px; background: color-mix(in srgb, var(--accent) 60%, transparent); }
+.x { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--crimson-r); background: color-mix(in srgb, var(--crimson) 8%, transparent); color: var(--crimson-r); font-size: 12px; font-weight: 700; }
+.field { display: grid; gap: 4px; margin-bottom: 12px; }
+.field label, .fhead { color: var(--text2); font-size: 12px; font-weight: 500; }
+.fhead { display: flex; align-items: center; justify-content: space-between; }
+.input { position: relative; display: flex; align-items: center; }
+.input input, .textin { width: 100%; height: 44px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--input); }
+.input .ficon { position: absolute; right: 6px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent-r); padding: 0; font-size: 13px; }
+.chip { height: 26px; padding: 0 12px; border-radius: 999px; border-width: 1.5px; font-size: 12px; font-weight: 700; color: var(--accent-r); }
+.note { color: var(--text2); font-size: 12px; margin: 0 0 12px; }
+.list { display: grid; gap: 6px; }
+.item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--divider); background: var(--surface); }
+.item .grow { flex: 1; min-width: 0; text-align: left; border: 0; background: transparent; padding: 0; }
+.item b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item small { color: var(--text2); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text2); flex: none; }
+.dot.on { background: var(--online); }
+.tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--accent-box); color: var(--on-accent); margin-left: 4px; }
+.mini { height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.balance { display: flex; align-items: center; gap: 4px; color: var(--accent-r); font-weight: 800; }
+.cells { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.cells span { aspect-ratio: 1; display: grid; place-items: center; border-radius: 8px; background: var(--input); color: var(--text2); font-size: 12px; font-weight: 700; }
+.cells span.d { background: var(--accent); color: var(--on-accent); }
+.cells span.last { outline: 2px solid var(--crimson); outline-offset: 1px; }
+.chatlog { display: grid; gap: 6px; max-height: 46dvh; overflow: auto; margin-bottom: 10px; align-content: start; }
+.msg { max-width: 82%; padding: 6px 12px; border-radius: 14px; background: var(--input); overflow-wrap: anywhere; }
+.msg.mine { justify-self: end; background: var(--accent-box); color: var(--on-accent); }
+.msg b { display: block; font-size: 11px; color: var(--text2); }
+.msg.mine b { color: inherit; opacity: .7; }
+.chatform { display: flex; gap: 8px; }
+.skins { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 16px; }
+.skins button { display: grid; gap: 4px; justify-items: center; border: 0; background: transparent; font-size: 11px; }
+.skins i { width: 34px; height: 34px; border-radius: 50%; border: 3px solid transparent; box-shadow: 0 0 0 1.5px var(--border); }
+.skins button[aria-pressed=true] i { border-color: var(--card); box-shadow: 0 0 0 3px var(--accent); }
+.win { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--divider); }
+.win b { color: var(--accent-r); }
+.stack { display: grid; gap: 10px; }
+#toasts { position: fixed; z-index: 50; left: 0; right: 0; top: calc(10px + env(safe-area-inset-top)); display: grid; justify-items: center; gap: 6px; pointer-events: none; }
+.toast { padding: 9px 18px; border-radius: 999px; background: var(--card); border: 1.5px solid var(--border); font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 92vw; }
+.toast.bad { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+</style>
+</head>
+<body>
+<div id="toasts" aria-live="polite"></div>
+
+<main id="connect" class="screen">
+  <div class="framed" style="padding:18px;border-radius:20px;margin-top:18px">
+    <div style="text-align:center">
+      <button class="ball" id="heroBall" style="--s:84px;margin:0 auto 10px;cursor:default" tabindex="-1" aria-hidden="true">47</button>
+      <h2 style="margin:0;font-size:22px;font-weight:900" id="title"></h2>
+      <div class="orn"><i></i><span>✦</span><i></i></div>
+    </div>
+    <div class="field">
+      <div class="fhead"><label for="addr" id="lblAddr"></label><button class="chip framed" id="btnShared" type="button"></button></div>
+      <div class="input"><input id="addr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="wss://…"></div>
+    </div>
+    <p class="note" id="addrNote"></p>
+    <div class="field">
+      <label for="name" id="lblName"></label>
+      <div class="input"><input id="name" maxlength="16" autocomplete="nickname"><button class="ficon" id="btnContinue" type="button" hidden>▶</button></div>
+    </div>
+    <button class="btn filled v-default block" id="btnConnect"></button>
+  </div>
+</main>
+
+<main id="game" class="screen" hidden>
+  <header class="topbar">
+    <div class="profile framed"><span class="packet"></span><div class="who"><b id="meName"></b><small id="meBal"></small></div></div>
+    <button class="round framed" id="btnBoard" aria-label="Bảng số"><svg viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></svg></button>
+    <button class="round framed" id="btnPlayers" aria-label="Người chơi"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M17 14.5c2.4 0 4 1.7 4 4.5"/></svg><span class="badge" id="playersBadge"></span></button>
+    <button class="round framed" id="btnSettings" aria-label="Cài đặt"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg></button>
+  </header>
+
+  <section class="caller framed">
+    <div class="statechip framed" id="stateChip"></div>
+    <div class="corner l"><button class="framed" id="btnChat" aria-label="Chat">💬<span class="badge" id="chatBadge"></span></button></div>
+    <div class="corner r"><button class="framed" id="btnSound" aria-label="Âm thanh"></button></div>
+    <div class="callrow">
+      <button class="ball" id="ball">?</button>
+      <div class="pot"><div class="cap"><span class="packet" style="--w:9px"></span><span id="potLabel"></span></div><div class="val" id="pot"></div></div>
+      <div class="chips">
+        <fieldset class="lchip"><legend id="lgSpeed"></legend><button id="chipSpeed"></button></fieldset>
+        <fieldset class="lchip"><legend id="lgPrice"></legend><button id="chipPrice"></button></fieldset>
+      </div>
+    </div>
+    <div class="actions" id="actions"></div>
+    <div class="tip framed" id="tip" role="status" hidden><button class="tipx" id="tipCancel" aria-label="Huỷ">✕</button><b id="tipTitle"></b><div class="secs" id="tipSecs"></div></div>
+  </section>
+  <div class="setchips" id="setChips"></div>
+  <div class="lost" id="lost" hidden><span id="lostText"></span><button class="btn filled v-warning" id="btnRejoin"></button></div>
+  <section id="pages"></section>
+</main>
+
+<script>
+"use strict";
+const LIST_URL = "https://zhuydt.github.io/loto_servers.json";
+const lang = (navigator.language || "vi").toLowerCase().startsWith("vi") ? "vi" : "en";
+const TEXT = {
+  vi: {
+    title: "Lô tô", addr: "Địa chỉ máy chủ", shared: "Server chia sẻ", name: "Tên của bạn", connect: "Kết nối", connecting: "Đang kết nối…", newSession: "Phiên mới", cont: "Tiếp tục phiên",
+    addrNote: "Trang https chỉ nối được wss://. Cùng wifi: mở trang này bằng http:// rồi nhập ip:cổng, ví dụ 192.168.1.5:9000.",
+    sharedTitle: "Server chia sẻ", select: "Chọn", loadingList: "Đang tải danh sách…", listFail: "Không tải được danh sách server", noList: "Chưa có server nào",
+    badAddr: "Địa chỉ không hợp lệ", mixed: "Trang https chỉ nối được wss://", needName: "Nhập tên của bạn", failed: "Không kết nối được máy chủ",
+    connected: "Đã kết nối", reconnected: "Đã nối lại phiên của bạn", admin: "Bạn là admin", disconnected: "Mất kết nối", rejoin: "Vào lại", leave: "Thoát khỏi phòng",
+    pot: "Hũ", speed: "Tốc độ", price: "Giá/tờ", board: "Bảng số", players: "Người chơi", chat: "Chat", settings: "Cài đặt", skin: "Giao diện", close: "Đóng",
+    sWaiting: "Chờ", sEnded: "Kết thúc", start: "Bắt đầu", pause: "Tạm dừng", resume: "Tiếp tục", playAgain: "Chơi lại", end: "Kết thúc", cancelGame: "Huỷ ván",
+    startsIn: "Bắt đầu sau", resetsIn: "Ván mới sau", cancelCount: "Dừng đếm ngược",
+    emptyTitle: "Chưa có tờ nào", emptyMine: "Mua tờ để bắt đầu chơi.", emptyOther: "Người này chưa có tờ.", buy: "+ Mua tờ", tab: n => `Tờ ${n}`,
+    change: "Đổi tờ", claim: "Kinh!", claimed: "Đã kinh", notBingo: "Chưa có hàng nào đủ", autoMark: "Tự dò", autoClaim: "Tự kinh",
+    viewing: "Về tờ tôi", bot: "bot", you: "bạn", ticketsN: n => `${n} tờ`, addBot: "Thêm bot", kick: "Mời ra", topup: "Nạp", topupAsk: "Số tiền nạp:",
+    sendChat: "Gửi", say: "Nhắn tin…", voice: "tin nhắn thoại", results: "Kết quả ván", won: "Bạn thắng",
+    joined: n => `${n} vào phòng`, online: n => `${n} đã trở lại`, offline: n => `${n} mất kết nối`, gone: n => `${n} đã rời phòng`, kinh: n => `Kinh! ${n}`,
+    save: "Lưu", sec: "giây", coins: "xu", draw: "Nhịp quay số", autostart: "Tự bắt đầu", autoreset: "Tự ván mới", balance: "Số dư đầu", grace: "Chờ nối lại", betT: "Giá mỗi tờ",
+    skins: { hoi_cho: "Hội chợ", tet: "Tết", la_chuoi: "Lá chuối", cham: "Chàm", muc_tau: "Mực tàu" },
+  },
+  en: {
+    title: "Lô tô", addr: "Server address", shared: "Shared server", name: "Your name", connect: "Connect", connecting: "Connecting…", newSession: "New session", cont: "Continue session",
+    addrNote: "An https page can only reach wss://. On the same wifi, open this page over http:// and enter ip:port, e.g. 192.168.1.5:9000.",
+    sharedTitle: "Shared servers", select: "Select", loadingList: "Loading servers…", listFail: "Couldn't load the server list", noList: "No servers available",
+    badAddr: "Invalid address", mixed: "An https page can only connect to wss://", needName: "Enter your name", failed: "Couldn't reach the server",
+    connected: "Connected", reconnected: "Reconnected to your session", admin: "You are the admin", disconnected: "Disconnected", rejoin: "Rejoin", leave: "Leave room",
+    pot: "Pot", speed: "Speed", price: "Price", board: "Number board", players: "Players", chat: "Chat", settings: "Settings", skin: "Theme", close: "Close",
+    sWaiting: "Waiting", sEnded: "Ended", start: "Start", pause: "Pause", resume: "Resume", playAgain: "Play again", end: "End", cancelGame: "Cancel",
+    startsIn: "Starts in", resetsIn: "New round in", cancelCount: "Stop countdown",
+    emptyTitle: "No tickets yet", emptyMine: "Buy tickets to start playing.", emptyOther: "This player has no tickets.", buy: "+ Buy", tab: n => `Ticket ${n}`,
+    change: "Swap", claim: "Kinh!", claimed: "Claimed", notBingo: "No complete row yet", autoMark: "Auto mark", autoClaim: "Auto claim",
+    viewing: "My tickets", bot: "bot", you: "you", ticketsN: n => `${n} tickets`, addBot: "Add bot", kick: "Remove", topup: "Top up", topupAsk: "Amount to add:",
+    sendChat: "Send", say: "Say something…", voice: "voice message", results: "Round results", won: "You won",
+    joined: n => `${n} joined`, online: n => `${n} is back`, offline: n => `${n} went offline`, gone: n => `${n} left`, kinh: n => `Kinh! ${n}`,
+    save: "Save", sec: "sec", coins: "coins", draw: "Draw interval", autostart: "Auto start", autoreset: "Auto new round", balance: "Starting balance", grace: "Reconnect grace", betT: "Price per ticket",
+    skins: { hoi_cho: "Fair", tet: "Tet", la_chuoi: "Banana leaf", cham: "Indigo", muc_tau: "Ink" },
+  },
+};
+const t = k => TEXT[lang][k] ?? TEXT.en[k] ?? k;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+const fmt = n => Number(n || 0).toLocaleString(lang);
+
+/* ---------- theme: 5 skin của app, sáng/tối theo hệ thống ---------- */
+const SKINS = {
+  hoi_cho: { l: { surface: "#FBEFD3", card: "#FFF9EA", input: "#F3E2BA", text: "#4E2A1E", text2: "#8D6E63", primary: "#2E7D32", crimson: "#C62828", accent: "#D99A00", onAccent: "#4E2A1E", box: "#FFE7A8", border: "#D9BE87", divider: "#E6D3A8" },
+             d: { surface: "#2B1A12", card: "#3A261B", input: "#4A3225", text: "#FFE9C2", text2: "#C9A98B", primary: "#81C784", crimson: "#EF5350", accent: "#FFC233", onAccent: "#4E2A1E", box: "#5A4012", border: "#6B4A36", divider: "#4A3225" } },
+  tet: { l: { surface: "#FFF0E0", card: "#FFF9F0", input: "#FBE3C8", text: "#4A1010", text2: "#8A5248", primary: "#E8A200", crimson: "#B71C1C", accent: "#C8102E", onAccent: "#FFF3D6", box: "#FFD9D2", border: "#E8B98F", divider: "#F1D3B5" },
+         d: { surface: "#2A0C0C", card: "#3D1414", input: "#521C1C", text: "#FFE6C7", text2: "#D1A08A", primary: "#FFC233", crimson: "#EF5350", accent: "#FF7A6B", onAccent: "#2A0C0C", box: "#5E1E1E", border: "#7A3A33", divider: "#522020" } },
+  la_chuoi: { l: { surface: "#EAF3E1", card: "#F6FBF0", input: "#D5E8C4", text: "#1F3A1F", text2: "#5E7A5A", primary: "#2E7D32", crimson: "#C62828", accent: "#B26A00", onAccent: "#FFFFFF", box: "#FFE8B5", border: "#B5D3A0", divider: "#CFE3BE" },
+              d: { surface: "#0F2414", card: "#17331C", input: "#1F4426", text: "#E3F4D8", text2: "#9EC49A", primary: "#81C784", crimson: "#EF5350", accent: "#FFCA28", onAccent: "#0F2414", box: "#4A3B0E", border: "#35603B", divider: "#1F4426" } },
+  cham: { l: { surface: "#E8EDF7", card: "#F6F8FD", input: "#D5DEF0", text: "#14213D", text2: "#5B6B8C", primary: "#2F4B9A", crimson: "#C62828", accent: "#B26A00", onAccent: "#FFFFFF", box: "#FFE8B5", border: "#B7C4E0", divider: "#CDD7EC" },
+          d: { surface: "#0D1530", card: "#16224A", input: "#1F2F63", text: "#E6ECFF", text2: "#A3B2DA", primary: "#7C9BFF", crimson: "#FF6B6B", accent: "#FFC233", onAccent: "#0D1530", box: "#4A3B0E", border: "#34478A", divider: "#1F2F63" } },
+  muc_tau: { l: { surface: "#EFEDE8", card: "#FAF9F6", input: "#E0DDD5", text: "#1C1C1C", text2: "#6B6B66", primary: "#2B2B2B", crimson: "#C62828", accent: "#C62828", onAccent: "#FFFFFF", box: "#F3D6D2", border: "#C9C5BA", divider: "#DDD9CE" },
+             d: { surface: "#141414", card: "#1F1F1F", input: "#2B2B2B", text: "#ECE9E2", text2: "#A9A59B", primary: "#E8E4DA", crimson: "#EF5350", accent: "#FF6B5E", onAccent: "#141414", box: "#4A1F1B", border: "#3D3B36", divider: "#2B2B2B" } },
+};
+const INK = "#4E2A1E", CREAM = "#FFF3D6";
+const rgb = h => { h = h.replace("#", ""); if (h.length === 8) h = h.slice(2); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+const hex = a => "#" + a.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("");
+const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+const lum = h => { const [r, g, b] = rgb(h); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+const mix = (a, b, k) => hex(rgb(a).map((v, i) => v * (1 - k) + rgb(b)[i] * k));
+const darken = (h, k) => mix(h, "#000000", k);
+const onSolid = h => (lum(h) > 0.35 ? INK : CREAM);
+let P = null, DARK = false;
+const toHsl = h => { const [r, g, b] = rgb(h).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1)), hh = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [hh * 60, s, l]; };
+const fromHsl = (h, s, l) => { const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return hex([(r + m) * 255, (g + m) * 255, (b + m) * 255]); };
+const tone = (h, s, l) => { const [hh, ss, ll] = toHsl(h); return fromHsl(hh, Math.min(1, ss * s), Math.min(1, ll * l)); };
+const readable = h => (lum(P.surface) > 0.5 && lum(h) > 0.3 ? darken(h, 0.35) : h);
+
+function applyTheme() {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const s = SKINS[S.skin] || SKINS.hoi_cho, raw = dark ? s.d : s.l, p = { ...raw };
+  for (const k of ["accent", "crimson", "primary", "box"]) p[k] = tone(raw[k], 0.8, dark ? 0.93 : 0.95);
+  if (dark) p.text = tone(raw.text, 0.9, 0.94);
+  else { p.surface = tone(raw.surface, 0.92, 0.97); p.card = tone(raw.card, 0.9, 0.955); p.input = tone(raw.input, 0.92, 0.96); }
+  P = p; DARK = dark;
+  const r = document.documentElement.style, set = (k, v) => r.setProperty(k, v);
+  set("--surface", p.surface); set("--card", p.card); set("--input", p.input); set("--text", p.text); set("--text2", p.text2);
+  set("--primary", p.primary); set("--crimson", p.crimson); set("--accent", p.accent); set("--on-accent", p.onAccent); set("--accent-box", p.box);
+  set("--border", p.border); set("--divider", p.divider);
+  set("--accent-r", readable(p.accent)); set("--crimson-r", readable(p.crimson)); set("--primary-r", readable(p.primary));
+  const variants = { default: p.primary, warning: dark ? "#FFCA28" : "#F9A825", danger: p.crimson, info: dark ? "#64B5F6" : "#1976D2" };
+  for (const [k, c] of Object.entries(variants)) { set(`--v-${k}`, c); set(`--v-${k}-r`, readable(c)); set(`--v-${k}-o`, onSolid(c)); }
+  document.querySelector('meta[name="theme-color"]').content = p.surface;
+}
+
+/* ---------- state ---------- */
+const S = { skin: store.get("loto.skin") || "hoi_cho", sound: store.get("loto.sound") !== "0" };
+function resetSession() {
+  Object.assign(S, {
+    ws: null, connecting: false, leaving: false, url: S.url || "", name: S.name || "", me: "", host: false, state: "WAITING", drawn: [], last: null,
+    timers: { draw: 0, start: 0, reset: 0 }, pages: [], marks: new Map(), autoMark: new Set(), autoClaim: new Set(), claimed: new Set(), cur: 0,
+    roster: [], freshRoster: true, bank: { bet: 0, pot: 0, balances: {}, results: [] }, graceMs: 0, startAt: null, resetAt: null, chat: [], seenChat: 0,
+    viewing: null, viewed: [], spoken: null,
+  });
+}
+resetSession();
+
+function toast(text, bad) {
+  const el = document.createElement("div");
+  el.className = "toast" + (bad ? " bad" : "");
+  el.textContent = text;
+  $("#toasts").append(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+/* ---------- dialogs ---------- */
+const dialogs = {};
+function mkDialog(id, title, body) {
+  const d = document.createElement("dialog");
+  d.className = "folk"; d.id = id; d.style.position = "fixed";
+  d.innerHTML = `<button class="x" type="button" aria-label="${esc(t("close"))}">✕</button><h2 data-title></h2><div class="orn"><i></i><span>✦</span><i></i></div><div class="body">${body}</div>`;
+  d.querySelector("[data-title]").textContent = title;
+  d.querySelector(".x").onclick = () => d.close();
+  d.addEventListener("click", e => { if (e.target === d) d.close(); });
+  document.body.append(d);
+  dialogs[id] = d;
+  return d;
+}
+const openDlg = id => { if (!dialogs[id].open) dialogs[id].showModal(); draw(); };
+
+/* ---------- connect ---------- */
+const sessionKey = url => "loto.session." + url;
+function savedSession(url) { try { return JSON.parse(store.get(sessionKey(url)) || "null"); } catch { return null; } }
+function wsUrl(raw) {
+  let s = raw.trim();
+  if (!s) return { error: "badAddr" };
+  if (/^https?:\/\//i.test(s)) s = s.replace(/^http/i, "ws");
+  else if (!/^wss?:\/\//i.test(s)) s = (location.protocol === "https:" ? "wss://" : "ws://") + s;
+  try {
+    const u = new URL(s);
+    if (location.protocol === "https:" && u.protocol === "ws:") return { error: "mixed" };
+    return { url: u.href.replace(/\/$/, "") };
+  } catch { return { error: "badAddr" }; }
+}
+const cleanName = raw => raw.trim().replace(/\s+/g, " ").slice(0, 16);
+
+function renderConnect() {
+  const busy = S.connecting, addr = wsUrl($("#addr").value), name = cleanName($("#name").value);
+  const session = !!(addr.url && name && savedSession(addr.url)?.name === name);
+  $("#btnConnect").textContent = busy ? t("connecting") : session ? t("newSession") : t("connect");
+  $("#btnConnect").disabled = busy;
+  $("#btnContinue").hidden = !session || busy;
+  $("#btnContinue").setAttribute("aria-label", t("cont"));
+  $("#btnShared").disabled = busy;
+  $("#addr").disabled = $("#name").disabled = busy;
+}
+
+async function loadServers() {
+  const box = $("#serverList");
+  box.innerHTML = `<p class="note">${esc(t("loadingList"))}</p>`;
+  try {
+    const res = await fetch(LIST_URL, { cache: "no-cache" });
+    if (!res.ok) throw new Error(res.status);
+    const root = await res.json();
+    const rows = Array.isArray(root) ? root : Array.isArray(root.servers) ? root.servers : [root];
+    const items = rows.flatMap(r => (r && typeof r === "object" ? (r.name && r.url ? [[r.name, r.url]] : Object.entries(r)) : [])).filter(([n, u]) => typeof n === "string" && typeof u === "string");
+    box.innerHTML = items.length ? "" : `<p class="note">${esc(t("noList"))}</p>`;
+    for (const [n, u] of items) {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `<div class="grow"><b>${esc(n)}</b><small>${esc(u)}</small></div><button class="btn filled v-default mini" type="button">${esc(t("select"))}</button>`;
+      row.querySelector("button").onclick = () => { $("#addr").value = u; dialogs.dlgServers.close(); renderConnect(); };
+      box.append(row);
+    }
+  } catch {
+    box.innerHTML = `<p class="note">${esc(t("listFail"))}</p><button class="btn ghost v-default block" id="retryList" type="button">↻</button>`;
+    $("#retryList").onclick = loadServers;
+  }
+}
+
+function connect(fresh) {
+  if (S.ws || S.connecting) return;
+  const addr = wsUrl($("#addr").value);
+  if (addr.error) return toast(t(addr.error), true);
+  const name = cleanName($("#name").value);
+  if (!name) return toast(t("needName"), true);
+  store.set("loto.addr", $("#addr").value.trim()); store.set("loto.name", name);
+  const sess = savedSession(addr.url), token = !fresh && sess?.name === name ? sess.token : "";
+  S.url = addr.url; S.name = name; S.connecting = true; renderConnect();
+  let opened = false, ws;
+  try { ws = new WebSocket(addr.url); } catch { S.connecting = false; renderConnect(); return toast(t("badAddr"), true); }
+  S.ws = ws;
+  ws.onopen = () => { opened = true; S.connecting = false; ws.send(`join ${name.replace(/ /g, "_")} ${token}`.trim()); };
+  ws.onmessage = ev => { try { handle(JSON.parse(ev.data)); } catch (e) { console.error(e); } };
+  ws.onclose = () => {
+    const leaving = S.leaving, url = S.url, nm = S.name, inGame = !$("#game").hidden;
+    resetSession(); S.url = url; S.name = nm;
+    Object.values(dialogs).forEach(d => d.open && d.close());
+    if (!opened) toast(t("failed"), true);
+    if (inGame && !leaving) { toast(t("disconnected"), true); $("#lost").hidden = false; draw(); return; }
+    show("connect"); renderConnect();
+  };
+}
+const send = line => { if (S.ws && S.ws.readyState === 1) S.ws.send(line); };
+function show(which) { $("#connect").hidden = which !== "connect"; $("#game").hidden = which !== "game"; }
+
+/* ---------- protocol ---------- */
+const parsePage = p => ({ id: p.id, bg: "#" + String(p.bg || "#FFF7E9C9").slice(3), grid: p.grid });
+function clearRound() { S.pages = []; S.marks.clear(); S.autoMark.clear(); S.autoClaim.clear(); S.claimed.clear(); S.cur = 0; }
+const nameOf = id => S.roster.find(p => p.id === id)?.name || id;
+
+function handle(m) {
+  const d = m.data;
+  switch (m.event) {
+    case "welcome":
+      S.me = d.id; S.host = !!d.host; S.freshRoster = true;
+      store.set(sessionKey(S.url), JSON.stringify({ name: S.name, token: d.token }));
+      $("#lost").hidden = true; show("game");
+      toast(d.resumed ? t("reconnected") : t("connected"));
+      if (S.host) toast(t("admin"));
+      break;
+    case "state": applyState(d); break;
+    case "number": S.last = d.number; if (!S.drawn.includes(d.number)) S.drawn.push(d.number); announce(); bump(); break;
+    case "pages": { const seen = new Set(S.pages.map(p => p.id)); for (const p of d.map(parsePage)) if (!seen.has(p.id)) S.pages.push(p); break; }
+    case "changed": { const fresh = parsePage(d.page); S.pages = S.pages.map(p => (p.id === d.old ? fresh : p)); S.marks.delete(d.old); S.autoMark.delete(d.old); S.autoClaim.delete(d.old); break; }
+    case "players": applyRoster(d); break;
+    case "viewed": if (d.id === S.viewing) S.viewed = d.pages.map(parsePage); break;
+    case "bank": applyBank(d); break;
+    case "chats": S.chat = d; break;
+    case "chat": if (d.n > (S.chat.at(-1)?.n || 0)) S.chat = [...S.chat, d].slice(-100); break;
+    case "winners": toast(t("kinh")(Object.keys(d).map(nameOf).join(", "))); break;
+    case "kicked": if (d === S.me) { S.leaving = true; S.ws?.close(); } break;
+    case "error": toast(String(d), true); break;
+  }
+  draw();
+}
+function applyState(d) {
+  const prev = S.state;
+  S.state = d.state; S.drawn = d.drawnNumbers || []; S.last = S.drawn.at(-1) ?? null;
+  S.timers = { draw: d.drawIntervalMs, start: d.autoStartMs, reset: d.autoResetMs };
+  if (S.state === "WAITING" && prev !== "WAITING") clearRound();
+  announce();
+  const set = drawnSet(), auto = S.pages.filter(p => S.autoClaim.has(p.id) && !S.claimed.has(p.id) && hasWin(p, set));
+  if (auto.length) { auto.forEach(p => S.claimed.add(p.id)); send("claim"); }
+}
+function applyRoster(next) {
+  if (S.freshRoster) S.freshRoster = false;
+  else {
+    const before = new Map(S.roster.map(p => [p.id, p]));
+    for (const p of next) {
+      if (p.id === S.me) continue;
+      const was = before.get(p.id);
+      if (!was) toast(t("joined")(p.name)); else if (!was.online && p.online) toast(t("online")(p.name)); else if (was.online && !p.online) toast(t("offline")(p.name));
+    }
+    for (const p of S.roster) if (p.id !== S.me && !next.some(n => n.id === p.id)) toast(t("gone")(p.name));
+  }
+  S.roster = next;
+  if (S.viewing) {
+    const seat = next.find(p => p.id === S.viewing);
+    if (!seat) { S.viewing = null; S.viewed = []; } else if (seat.pages !== S.viewed.length) send("view " + S.viewing);
+  }
+}
+function applyBank(d) {
+  const now = Date.now(), had = S.bank.results.length;
+  S.bank = { bet: d.bet, pot: d.pot, balances: d.balances || {}, results: d.results || [] };
+  S.startAt = d.autoStartIn == null ? null : now + d.autoStartIn;
+  S.resetAt = d.autoResetIn == null ? null : now + d.autoResetIn;
+  S.graceMs = d.graceMs; S.initBalance = d.initBalance;
+  if (!had && S.bank.results.length) showResults();
+}
+function showResults() {
+  const mine = S.bank.results.find(r => r.id === S.me && r.prize > 0);
+  if (mine) toast(`${t("won")} +${fmt(mine.prize)}`);
+  openDlg("dlgResults");
+}
+function announce() {
+  if (S.last == null || S.last === S.spoken) return;
+  S.spoken = S.last;
+  if (!S.sound || !("speechSynthesis" in window)) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(String(S.last)); u.lang = "vi-VN"; speechSynthesis.speak(u); } catch {}
+}
+
+/* ---------- derived ---------- */
+const drawnSet = () => new Set(S.drawn);
+const rowFull = (row, set) => { const n = row.filter(Boolean); return n.length > 0 && n.every(x => set.has(x)); };
+const hasWin = (page, set) => page.grid.some(r => rowFull(r, set));
+const joinable = () => S.state === "WAITING" || S.state === "VOTING";
+const marksOf = p => (S.autoMark.has(p.id) ? drawnSet() : S.marks.get(p.id) || new Set());
+
+/* ---------- render ---------- */
+let queued = false;
+function draw() { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; paint(); }); }
+function bump() { const b = $("#ball"); b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+const packet = w => `<span class="packet" style="--w:${w}px"></span>`;
+
+function paint() {
+  if ($("#game").hidden) return;
+  const bal = S.bank.balances[S.me];
+  $("#meName").textContent = S.name; $("#meBal").textContent = fmt(bal);
+  $("#playersBadge").textContent = S.roster.length; $("#playersBadge").hidden = !S.roster.length;
+  const unread = S.chat.filter(m => m.n > S.seenChat && m.id !== S.me).length;
+  $("#chatBadge").textContent = unread; $("#chatBadge").hidden = !unread;
+  $("#btnSound").textContent = S.sound ? "🔊" : "🔇";
+  $("#btnChat").classList.toggle("on", !!S.ws);
+
+  const n = S.drawn.length;
+  $("#stateChip").textContent = S.state === "PLAYING" ? `▶ ${n}/90` : S.state === "PAUSED" ? `⏸ ${n}/90` : S.state === "ENDED" ? `🏁 ${t("sEnded")}` : `⏳ ${t("sWaiting")}`;
+  $("#ball").textContent = S.last ?? "?";
+  $("#pot").textContent = fmt(S.bank.pot);
+  $("#potLabel").textContent = t("pot");
+  $("#lgSpeed").textContent = t("speed"); $("#lgPrice").textContent = t("price");
+  $("#chipSpeed").textContent = (S.timers.draw / 1000 || 0) + "s"; $("#chipSpeed").disabled = !S.host;
+  $("#chipPrice").textContent = fmt(S.bank.bet); $("#chipPrice").disabled = !S.host;
+  $("#btnRejoin").textContent = t("rejoin"); $("#lostText").textContent = t("disconnected");
+  drawActions(); updateCount(); drawChips(); drawPages();
+  if (dialogs.dlgBoard.open) drawBoard();
+  if (dialogs.dlgPlayers.open) drawPlayers();
+  if (dialogs.dlgChat.open) { drawChat(); S.seenChat = S.chat.at(-1)?.n || 0; }
+  if (dialogs.dlgResults.open) drawResults();
+  if (dialogs.dlgSettings.open) drawSettings();
+}
+function btn(cmd, label, variant, filled, wide) { return `<button class="btn ${filled ? "filled" : "ghost"} v-${variant}${wide ? " wide" : ""}" data-cmd="${cmd}">${esc(label)}</button>`; }
+function drawActions() {
+  const box = $("#actions"); box.hidden = !S.host;
+  if (!S.host) return;
+  const s = S.state;
+  box.innerHTML = s === "WAITING" || s === "VOTING" ? btn("start", "▶ " + t("start"), "default", true)
+    : s === "PLAYING" ? btn("pause", "⏸ " + t("pause"), "default", true, true) + btn("end", t("end"), "warning") + btn("cancel", t("cancelGame"), "danger")
+    : s === "PAUSED" ? btn("resume", "▶ " + t("resume"), "default", true, true) + btn("end", t("end"), "warning") + btn("cancel", t("cancelGame"), "danger")
+    : btn("reset", t("playAgain"), "default", true);
+}
+function drawChips() {
+  const box = $("#setChips"); box.hidden = !S.host;
+  if (!S.host) return;
+  const chips = [["draw", t("draw"), (S.timers.draw / 1000) + "s"], ["autostart", t("autostart"), (S.timers.start / 1000) + "s"], ["autoreset", t("autoreset"), (S.timers.reset / 1000) + "s"],
+    ["balance", t("balance"), fmt(S.initBalance)], ["grace", t("grace"), ((S.graceMs || 0) / 1000) + "s"]];
+  box.innerHTML = chips.map(([k, l, v]) => `<fieldset class="lchip"><legend>${esc(l)}</legend><button data-num="${k}">${esc(v)}</button></fieldset>`).join("");
+}
+function updateCount() {
+  const at = S.state === "ENDED" ? S.resetAt : S.startAt, left = at ? Math.max(0, Math.ceil((at - Date.now()) / 1000)) : 0;
+  $("#tip").hidden = !left;
+  $("#tipTitle").textContent = left ? (S.state === "ENDED" ? t("resetsIn") : "🚀 " + t("startsIn")) : "";
+  $("#tipSecs").textContent = left ? left + "s" : "";
+  $("#tipCancel").hidden = !S.host;
+}
+setInterval(() => { if (!$("#game").hidden) updateCount(); }, 250);
+
+function paperVars(raw) {
+  const bg = DARK ? mix(raw, "#000000", 0.16) : raw, ink = onSolid(bg), frame = readable(bg);
+  return `--paper:${bg};--ink-p:${ink};--frame:${frame};--line:${ink}73;--blank:${darken(bg, 0.12)};--mark-text:${onSolid(P.crimson)}`;
+}
+function ticketHTML(page, marked, readonly) {
+  const blocks = [];
+  for (let b = 0; b < page.grid.length; b += 3) {
+    blocks.push(`<div class="block">` + page.grid.slice(b, b + 3).map(row => `<div class="row${rowFull(row, marked) ? " full" : ""}">` + row.map(v =>
+      !v ? `<span class="cell blank"></span>` : `<${readonly ? "span" : "button"} class="cell${marked.has(v) ? " on" : ""}" ${readonly ? "" : `data-page="${page.id}" data-n="${v}"`}>${marked.has(v) ? '<i class="mk"></i>' : ""}<span class="n">${v}</span></${readonly ? "span" : "button"}>`).join("") + `</div>`).join("") + `</div>`);
+  }
+  return `<div class="ticket">${blocks.join("")}</div>`;
+}
+function drawPages() {
+  const host = $("#pages"), viewing = S.viewing, mine = !viewing, set = drawnSet();
+  const pages = mine ? S.pages : S.viewed, canBuy = mine && joinable();
+  S.cur = Math.min(S.cur, Math.max(0, pages.length - 1));
+  if (!pages.length) {
+    host.innerHTML = `${viewing ? viewingChip() : ""}<div class="empty"><h3>${esc(t("emptyTitle"))}</h3><p>${esc(t(mine ? "emptyMine" : "emptyOther"))}</p>${canBuy ? `<button class="btn filled v-danger" data-buy>${esc(t("buy").replace(/^\+\s*/, ""))}</button>` : ""}</div>`;
+    return;
+  }
+  const showTabs = pages.length > 1 || canBuy || !mine, page = pages[S.cur], marked = mine ? marksOf(page) : set;
+  const tabs = pages.map((p, i) => `<button class="tab" role="tab" aria-selected="${i === S.cur}" data-tab="${i}">${esc(t("tab")(i + 1))}</button>`).join("");
+  const trailing = (canBuy ? `<button class="pill v-danger" data-buy>${esc(t("buy"))}</button>` : "") + (viewing ? viewingChip() : "");
+  const waiting = joinable(), claimed = S.claimed.has(page.id);
+  const toolbar = mine ? `<div class="toolbar"><button class="gridtab" ${waiting ? `data-change="${page.id}"` : `data-claim="${page.id}"`} ${!waiting && claimed ? "disabled" : ""}>${esc(waiting ? t("change") : t("claim"))}</button>
+    <div class="checks"><label class="check"><input type="checkbox" data-am="${page.id}" ${S.autoMark.has(page.id) ? "checked" : ""}>${esc(t("autoMark"))}</label><label class="check"><input type="checkbox" data-ac="${page.id}" ${S.autoClaim.has(page.id) ? "checked" : ""}>${esc(t("autoClaim"))}</label></div></div>` : "";
+  host.innerHTML = `${showTabs ? `<div class="tabs"><div class="tablist" role="tablist">${tabs}</div>${trailing}</div>` : ""}
+    <div class="card${showTabs ? "" : " solo"}" style="${paperVars(page.bg)}" id="card">${toolbar}${ticketHTML(page, marked, !mine)}${mine && claimed ? `<div class="claimed">${esc(t("claimed"))}</div>` : ""}</div>`;
+}
+const viewingChip = () => `<div class="viewing v-info"><span>👀 ${esc(nameOf(S.viewing))}</span><button data-back>${esc(t("viewing"))}</button></div>`;
+
+function drawBoard() {
+  const set = drawnSet();
+  $("#boardGrid").innerHTML = Array.from({ length: 90 }, (_, i) => i + 1).map(n => `<span class="${set.has(n) ? "d" : ""}${n === S.last ? " last" : ""}">${n}</span>`).join("");
+}
+function drawPlayers() {
+  $("#playersList").innerHTML = S.roster.map(p => `<div class="item"><span class="dot${p.online ? " on" : ""}"></span>
+    <button class="grow" data-view="${esc(p.id)}"><b>${esc(p.name)}${p.id === S.me ? `<span class="tag">${esc(t("you"))}</span>` : ""}${p.bot ? `<span class="tag">${esc(t("bot"))}</span>` : ""}</b><small>${esc(t("ticketsN")(p.pages))}</small></button>
+    <span class="balance">${packet(10)}${fmt(S.bank.balances[p.id])}</span>
+    ${S.host && p.id !== S.me ? `<button class="mini btn ghost v-default" data-topup="${esc(p.id)}">${esc(t("topup"))}</button><button class="mini btn ghost v-danger" data-kick="${esc(p.id)}">✕</button>` : ""}</div>`).join("");
+  $("#btnAddBot").hidden = !(S.host && joinable());
+}
+function drawChat() {
+  const log = $("#chatlog"), stick = log.scrollTop + log.clientHeight >= log.scrollHeight - 30;
+  log.innerHTML = S.chat.map(m => `<div class="msg${m.id === S.me ? " mine" : ""}"><b>${esc(m.name)}</b>${m.sec ? `<i>${esc(t("voice"))} (${m.sec}s)</i>` : esc(m.text)}</div>`).join("");
+  if (stick) log.scrollTop = log.scrollHeight;
+}
+function drawResults() {
+  $("#resultsBody").innerHTML = S.bank.results.map(r => `<div class="win"><span>${esc(r.name)}${r.id === S.me ? ` (${esc(t("you"))})` : ""} · ${esc(t("ticketsN")(r.pages))}</span><b>+${fmt(r.prize)}</b></div>`).join("");
+}
+function drawSettings() {
+  $("#skins").innerHTML = Object.keys(SKINS).map(k => `<button data-skin="${k}" aria-pressed="${S.skin === k}"><i style="background:${k === "hoi_cho" ? CREAM : k === "tet" ? SKINS.tet.l.accent : SKINS[k].l.primary}"></i>${esc(t("skins")[k])}</button>`).join("");
+}
+
+/* ---------- number dialog ---------- */
+const NUM = { bet: ["betT", 1, "coins", 1], draw: ["draw", 0.2, "sec", 1000], autostart: ["autostart", 0, "sec", 1000], autoreset: ["autoreset", 0, "sec", 1000], balance: ["balance", 0, "coins", 1], grace: ["grace", 0, "sec", 1000] };
+let numKey = null;
+function askNumber(key) {
+  const [label, min, unit, scale] = NUM[key];
+  numKey = key;
+  const cur = { bet: S.bank.bet, draw: S.timers.draw, autostart: S.timers.start, autoreset: S.timers.reset, balance: S.initBalance, grace: S.graceMs }[key] || 0;
+  dialogs.dlgNum.querySelector("[data-title]").textContent = t(label);
+  $("#numIn").value = cur / scale; $("#numIn").min = min; $("#numIn").step = scale === 1 ? 1 : 0.1; $("#numUnit").textContent = t(unit);
+  openDlg("dlgNum"); setTimeout(() => $("#numIn").select(), 50);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", e => {
+  const el = e.target.closest("button, input"); if (!el) return;
+  const d = el.dataset;
+  if (d.n) { const id = +d.page; if (S.autoMark.has(id)) return; const cur = new Set(S.marks.get(id) || []); const v = +d.n; cur.has(v) ? cur.delete(v) : cur.add(v); S.marks.set(id, cur); draw(); }
+  else if (d.tab) { S.cur = +d.tab; draw(); }
+  else if (d.change) send("change " + d.change);
+  else if ("buy" in d) send("buy 1");
+  else if (d.claim) { const page = S.pages.find(p => p.id === +d.claim); if (!page || !hasWin(page, drawnSet())) return toast(t("notBingo"), true); S.pages.filter(p => hasWin(p, drawnSet())).forEach(p => S.claimed.add(p.id)); send("claim"); draw(); }
+  else if (d.am) { const id = +d.am; if (el.checked) S.autoMark.add(id); else { S.autoMark.delete(id); S.marks.set(id, drawnSet()); } draw(); }
+  else if (d.ac) { +d.ac && (el.checked ? S.autoClaim.add(+d.ac) : S.autoClaim.delete(+d.ac)); draw(); }
+  else if ("back" in d) { S.viewing = null; S.viewed = []; S.cur = 0; draw(); }
+  else if (d.view) { dialogs.dlgPlayers.close(); if (d.view === S.me) { S.viewing = null; S.viewed = []; } else { S.viewing = d.view; S.viewed = []; S.cur = 0; send("view " + d.view); } draw(); }
+  else if (d.kick) send("kick " + d.kick);
+  else if (d.topup) { const v = prompt(t("topupAsk")); if (v && !isNaN(+v)) send(`topup ${d.topup} ${Math.trunc(+v)}`); }
+  else if (d.cmd) send(d.cmd);
+  else if (d.num) askNumber(d.num);
+  else if (d.skin) { S.skin = d.skin; store.set("loto.skin", d.skin); applyTheme(); draw(); }
+});
+$("#btnBoard").onclick = $("#ball").onclick = () => openDlg("dlgBoard");
+$("#btnPlayers").onclick = () => { openDlg("dlgPlayers"); };
+$("#btnSettings").onclick = () => openDlg("dlgSettings");
+$("#btnChat").onclick = () => { S.seenChat = S.chat.at(-1)?.n || 0; openDlg("dlgChat"); setTimeout(() => $("#chatin").focus(), 50); };
+$("#btnSound").onclick = () => { S.sound = !S.sound; store.set("loto.sound", S.sound ? "1" : "0"); if (!S.sound && "speechSynthesis" in window) speechSynthesis.cancel(); draw(); };
+$("#chipSpeed").onclick = () => askNumber("draw");
+$("#chipPrice").onclick = () => askNumber("bet");
+$("#tipCancel").onclick = () => send("stopauto");
+$("#btnRejoin").onclick = () => { $("#lost").hidden = true; show("connect"); connect(false); };
+$("#btnShared").onclick = () => { openDlg("dlgServers"); loadServers(); };
+$("#btnConnect").onclick = () => connect(true);
+$("#btnContinue").onclick = () => connect(false);
+$("#addr").oninput = $("#name").oninput = renderConnect;
+$("#name").addEventListener("keydown", e => { if (e.key === "Enter") connect(false); });
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.id === "chatform") { const v = $("#chatin").value.trim(); if (v) { send("chat " + v); $("#chatin").value = ""; } }
+  if (e.target.id === "numForm" && numKey) { const [, , , scale] = NUM[numKey], v = Math.round(parseFloat($("#numIn").value) * scale); if (!isNaN(v) && v >= 0) send(`set ${numKey} ${v}`); dialogs.dlgNum.close(); }
+});
+let touchX = null;
+document.addEventListener("touchstart", e => { touchX = e.target.closest("#card") ? e.touches[0].clientX : null; }, { passive: true });
+document.addEventListener("touchend", e => {
+  if (touchX == null) return;
+  const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+  const count = (S.viewing ? S.viewed : S.pages).length;
+  if (Math.abs(dx) > 60) { S.cur = Math.max(0, Math.min(count - 1, S.cur + (dx < 0 ? 1 : -1))); draw(); }
+}, { passive: true });
+
+/* ---------- boot ---------- */
+(function boot() {
+  document.documentElement.lang = lang;
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener?.("change", () => { applyTheme(); draw(); });
+  applyTheme();
+  mkDialog("dlgServers", t("sharedTitle"), `<div class="list" id="serverList"></div>`);
+  mkDialog("dlgBoard", t("board"), `<div class="cells" id="boardGrid"></div>`);
+  mkDialog("dlgPlayers", t("players"), `<div class="list" id="playersList"></div><button class="btn filled v-default block" id="btnAddBot" style="margin-top:12px" hidden></button>`);
+  mkDialog("dlgChat", t("chat"), `<div class="chatlog" id="chatlog"></div><form class="chatform" id="chatform"><input class="textin" id="chatin" maxlength="200" autocomplete="off"><button class="btn filled v-default" id="chatSend"></button></form>`);
+  mkDialog("dlgSettings", t("settings"), `<div class="fhead" style="justify-content:center;margin-bottom:8px">${esc(t("skin"))}</div><div class="skins" id="skins"></div><button class="btn ghost v-danger block" id="btnLeave"></button>`);
+  mkDialog("dlgNum", "", `<form id="numForm" class="stack"><div class="input"><input id="numIn" type="number" inputmode="decimal"><span id="numUnit" style="position:absolute;right:14px;color:var(--text2)"></span></div><button class="btn filled v-default block" id="numSave"></button></form>`);
+  mkDialog("dlgResults", t("results"), `<div id="resultsBody"></div><button class="btn filled v-default block" id="resultsClose" style="margin-top:14px"></button>`);
+  $("#resultsClose").onclick = () => dialogs.dlgResults.close();
+$("#btnAddBot").onclick = () => send("addbot");
+$("#btnLeave").onclick = () => { dialogs.dlgSettings.close(); S.leaving = true; S.ws?.close(); };
+  $("#btnAddBot").textContent = t("addBot"); $("#chatSend").textContent = t("sendChat"); $("#chatin").placeholder = t("say");
+  $("#btnLeave").textContent = t("leave"); $("#numSave").textContent = t("save"); $("#resultsClose").textContent = t("close");
+  $("#title").textContent = t("title"); $("#lblAddr").textContent = t("addr"); $("#lblName").textContent = t("name"); $("#addrNote").textContent = t("addrNote"); $("#btnShared").textContent = t("shared");
+  $("#addr").value = store.get("loto.addr") || ""; $("#name").value = store.get("loto.name") || "";
+  const hero = $("#heroBall");
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(() => { hero.textContent = 1 + Math.floor(Math.random() * 90); hero.classList.remove("pop"); void hero.offsetWidth; hero.classList.add("pop"); }, 2200);
+  renderConnect();
+})();
+</script>
+</body>
+</html>

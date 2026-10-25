@@ -8,6 +8,7 @@ const TEXT = {
     addrNote: "Trang https chỉ nối được wss://. Cùng wifi: mở trang này bằng http:// rồi nhập ip:cổng, ví dụ 192.168.1.5:9000.",
     sharedTitle: "Server chia sẻ", select: "Chọn", loadingList: "Đang tải danh sách…", listFail: "Không tải được danh sách server", noList: "Chưa có server nào",
     badAddr: "Địa chỉ không hợp lệ", mixed: "Trang https chỉ nối được wss://", needName: "Nhập tên của bạn", failed: "Không kết nối được máy chủ",
+    trustNote: "Máy chủ dùng chứng chỉ tự ký. Chỉ lần đầu: ① bấm nút bên dưới ② chọn Nâng cao → Tiếp tục (thấy chữ ok là xong) ③ quay lại đây bấm Kết nối.", trustOpen: "① Mở trang xác nhận",
     connected: "Đã kết nối", reconnected: "Đã nối lại phiên của bạn", admin: "Bạn là admin", disconnected: "Mất kết nối", rejoin: "Vào lại", leave: "Thoát khỏi phòng",
     pot: "Hũ", speed: "Tốc độ", price: "Giá/tờ", board: "Bảng số", players: "Người chơi", chat: "Chat", settings: "Cài đặt", skin: "Giao diện", close: "Đóng",
     sWaiting: "Chờ", sEnded: "Kết thúc", start: "Bắt đầu", pause: "Tạm dừng", resume: "Tiếp tục", playAgain: "Chơi lại", end: "Kết thúc", cancelGame: "Huỷ ván",
@@ -26,6 +27,7 @@ const TEXT = {
     addrNote: "An https page can only reach wss://. On the same wifi, open this page over http:// and enter ip:port, e.g. 192.168.1.5:9000.",
     sharedTitle: "Shared servers", select: "Select", loadingList: "Loading servers…", listFail: "Couldn't load the server list", noList: "No servers available",
     badAddr: "Invalid address", mixed: "An https page can only connect to wss://", needName: "Enter your name", failed: "Couldn't reach the server",
+    trustNote: "This server uses a self-signed certificate. First time only: ① tap the button below ② choose Advanced → Proceed (you will see ok) ③ come back and tap Connect.", trustOpen: "① Open the confirm page",
     connected: "Connected", reconnected: "Reconnected to your session", admin: "You are the admin", disconnected: "Disconnected", rejoin: "Rejoin", leave: "Leave room",
     pot: "Pot", speed: "Speed", price: "Price", board: "Number board", players: "Players", chat: "Chat", settings: "Settings", skin: "Theme", close: "Close",
     sWaiting: "Waiting", sEnded: "Ended", start: "Start", pause: "Pause", resume: "Resume", playAgain: "Play again", end: "End", cancelGame: "Cancel",
@@ -191,7 +193,7 @@ function connect(fresh) {
   if (!name) return toast(t("needName"), true);
   store.set("loto.addr", $("#addr").value.trim()); store.set("loto.name", name);
   const sess = savedSession(addr.url), token = !fresh && sess?.name === name ? sess.token : "";
-  S.url = addr.url; S.name = name; S.connecting = true; renderConnect();
+  S.url = addr.url; S.name = name; S.connecting = true; $("#trust").hidden = true; renderConnect();
   let opened = false, ws;
   try { ws = new WebSocket(addr.url); } catch { S.connecting = false; renderConnect(); return toast(t("badAddr"), true); }
   S.ws = ws;
@@ -204,7 +206,14 @@ function connect(fresh) {
     if (!opened) toast(t("failed"), true);
     if (inGame && !leaving) { toast(t("disconnected"), true); $("#lost").hidden = false; draw(); return; }
     show("connect"); renderConnect();
+    showTrust(opened ? "" : url);
   };
+}
+function showTrust(url) {
+  let u; try { u = new URL(url); } catch {}
+  const lan = !!u && u.protocol === "wss:" && /^(\d{1,3}\.){3}\d{1,3}$|\.local$/.test(u.hostname);
+  $("#trust").hidden = !lan;
+  if (lan) $("#trustLink").href = `https://${u.host}/`;
 }
 const send = line => { if (S.ws && S.ws.readyState === 1) S.ws.send(line); };
 function show(which) { $("#connect").hidden = which !== "connect"; $("#game").hidden = which !== "game"; }
@@ -439,7 +448,8 @@ $("#btnRejoin").onclick = () => { $("#lost").hidden = true; show("connect"); con
 $("#btnShared").onclick = () => { openDlg("dlgServers"); loadServers(); };
 $("#btnConnect").onclick = () => connect(true);
 $("#btnContinue").onclick = () => connect(false);
-$("#addr").oninput = $("#name").oninput = renderConnect;
+$("#addr").oninput = () => { $("#trust").hidden = true; renderConnect(); };
+$("#name").oninput = renderConnect;
 $("#name").addEventListener("keydown", e => { if (e.key === "Enter") connect(false); });
 document.addEventListener("submit", e => {
   e.preventDefault();
@@ -473,7 +483,7 @@ $("#btnAddBot").onclick = () => send("addbot");
 $("#btnLeave").onclick = () => { dialogs.dlgSettings.close(); S.leaving = true; S.ws?.close(); };
   $("#btnAddBot").textContent = t("addBot"); $("#chatSend").textContent = t("sendChat"); $("#chatin").placeholder = t("say");
   $("#btnLeave").textContent = t("leave"); $("#numSave").textContent = t("save"); $("#resultsClose").textContent = t("close");
-  $("#title").textContent = t("title"); $("#lblAddr").textContent = t("addr"); $("#lblName").textContent = t("name"); $("#addrNote").textContent = t("addrNote"); $("#btnShared").textContent = t("shared"); document.querySelectorAll(".lnkServer").forEach(a => a.textContent = t("getServer"));
+  $("#title").textContent = t("title"); $("#lblAddr").textContent = t("addr"); $("#lblName").textContent = t("name"); $("#addrNote").textContent = t("addrNote"); $("#trustNote").textContent = t("trustNote"); $("#trustLink").textContent = t("trustOpen"); $("#btnShared").textContent = t("shared"); document.querySelectorAll(".lnkServer").forEach(a => a.textContent = t("getServer"));
   $("#addr").value = store.get("loto.addr") || ""; $("#name").value = store.get("loto.name") || "";
   const hero = $("#heroBall");
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(() => { hero.textContent = 1 + Math.floor(Math.random() * 90); hero.classList.remove("pop"); void hero.offsetWidth; hero.classList.add("pop"); }, 2200);

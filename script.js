@@ -1,5 +1,5 @@
 "use strict";
-const LIST_URL = "https://zhuydt.github.io/loto_servers.json";
+const LIST_URL = "./loto_servers.json";
 const lang = (navigator.language || "vi").toLowerCase().startsWith("vi") ? "vi" : "en";
 const TEXT = {
   vi: {
